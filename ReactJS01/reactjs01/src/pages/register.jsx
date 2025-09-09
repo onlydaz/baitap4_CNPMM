@@ -1,6 +1,7 @@
-import { register } from 'react';
+import React from 'react';
 import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { createUserApi } from '../util/api';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 
 const RegisterPage = () => {
@@ -9,7 +10,7 @@ const RegisterPage = () => {
   const onFinish = async (values) => {
     const { name, email, password } = values;
 
-    const res = await createuserApi(name, email, password);
+    const res = await createUserApi(name, email, password);
 
     if (res) {
       notification.success({
