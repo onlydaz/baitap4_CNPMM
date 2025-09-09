@@ -1,5 +1,5 @@
 const express = require('express');
-const { createUser, handleLogin, getUser, getAccount } = require('../controllers/userController');
+const { createUser, handleLogin, getUser, getAccount, forgotPassword, resetPassword } = require('../controllers/userController');
 const auth = require('../middleware/auth');
 const delay = require('../middleware/delay');
 
@@ -11,6 +11,8 @@ routerAPI.get("/", (req, res) => {
 });
 routerAPI.post("/register", createUser);
 routerAPI.post("/login", handleLogin);
+routerAPI.post("/forgot-password", forgotPassword);
+routerAPI.post("/reset-password", resetPassword);
 routerAPI.get("/user", getUser);
 routerAPI.get("/account", delay, getAccount);
 

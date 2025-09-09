@@ -24,3 +24,13 @@ const getUserApi = () => {
 export {
     createUserApi, loginApi, getUserApi
 }
+
+export const forgotPasswordApi = (email) => {
+    const URL_API = "/v1/api/forgot-password";
+    return axios.post(URL_API, { email });
+}
+
+export const resetPasswordApi = (email, otp, password) => {
+    const URL_API = "/v1/api/reset-password";
+    return axios.post(URL_API, { email, otp, password });
+}

@@ -14,7 +14,7 @@ const LoginPage = () => {
 
     const res = await loginApi(email, password);
 
-    if (res && res.status === 0) {
+    if (res && res.EC === 0) {
       localStorage.setItem('access_token', res.access_token);
       notification.success({
         message: 'LOGIN USER',
@@ -76,6 +76,9 @@ const LoginPage = () => {
               </Button>
             </Form.Item>
           </Form>
+          <div style={{ marginTop: 8 }}>
+            <Link to={'/forgot-password'}>Quên mật khẩu?</Link>
+          </div>
 
           <Form.Item>
             <Link to={'/'}><ArrowLeftOutlined /> quay lại trang chủ</Link>

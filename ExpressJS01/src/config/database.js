@@ -2,8 +2,6 @@ require('dotenv').config();
 
 const { Sequelize } = require('sequelize');
 
-// Initialize Sequelize instance for MySQL
-// Required env: MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD
 const sequelize = new Sequelize(
 	process.env.MYSQL_DB,
 	process.env.MYSQL_USER,
@@ -21,7 +19,7 @@ const connection = async () => {
 	await sequelize.authenticate();
 	console.log('Connected to database');
 	// Auto sync models to DB. For production, consider migrations instead.
-	await sequelize.sync();
+	await sequelize.sync({ alter: true });
 };
 
 // Expose sequelize so models can import it
