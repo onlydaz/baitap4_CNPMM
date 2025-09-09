@@ -9,7 +9,7 @@ const saltRounds = 10;
 const createUserService = async (name, email, password) => {
     try {
         //check user exist
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ where: { email } });
         if (user) {
             console.log('>> user exist, chọn email khác: ${email}');
             return null;
@@ -35,11 +35,11 @@ const createUserService = async (name, email, password) => {
 const loginService = async (email, password) => {
     try {
         //fetch user by email
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ where: { email: email } });
         if (user) {
             //compare password
             const isMatchPassword = await bcrypt.compare(password, user.password);
-            if (isMatchPassword) {
+            if (!isMatchPassword) {
                 return {
                     EC: 2,
                     EM: "Email/Password không hợp lệ"
@@ -80,7 +80,7 @@ const loginService = async (email, password) => {
 
 const getUserService = async () => {
     try {
-        let result = await User.find().select("-password");
+        let result = await User.findAll({ attributes: { exclude: ['password'] } });
         return result;
     } catch (error) {
         console.log(error);

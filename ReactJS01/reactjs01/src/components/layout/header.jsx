@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { UsergroupAddOutlined, HomeOutlined, SettingOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/auth_context';
+import { AuthContext } from '../context/auth.context';
 
 const Header = () => {
     const navigate = useNavigate();

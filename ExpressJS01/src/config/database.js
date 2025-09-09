@@ -1,30 +1,30 @@
 require('dotenv').config();
 
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 
-const dbState = [
-    {
-        value: 0,
-        label: "Disconnected"
-    },
-    {
-        value: 1,
-        label: "Connected"
-    },
-    {
-        value: 2,
-        label: "Connecting"
-    },
-    {
-        value: 3,
-        label: "Disconnecting"
-    }
-];
+// Initialize Sequelize instance for MySQL
+// Required env: MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD
+const sequelize = new Sequelize(
+	process.env.MYSQL_DB,
+	process.env.MYSQL_USER,
+	process.env.MYSQL_PASSWORD,
+	{
+		host: process.env.MYSQL_HOST,
+		port: process.env.MYSQL_PORT || 3306,
+		dialect: 'mysql',
+		logging: false
+	}
+);
 
+// Keep the same exported name `connection` for server startup compatibility
 const connection = async () => {
-    await mongoose.connect(process.env.MONGO_DB_URL);
-    const state = Number(mongoose.connection.readyState);
-    console.log(dbState.find(f => f.value === state).label, "to database"); // connected to db
-}
+	await sequelize.authenticate();
+	console.log('Connected to database');
+	// Auto sync models to DB. For production, consider migrations instead.
+	await sequelize.sync();
+};
+
+// Expose sequelize so models can import it
+connection.sequelize = sequelize;
 
 module.exports = connection;
