@@ -76,17 +76,22 @@ const LoginPage = () => {
               </Button>
             </Form.Item>
           </Form>
-          <div style={{ marginTop: 8 }}>
+
+          {/* Quên mật khẩu và Quay lại trang chủ */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            marginTop: 8 
+          }}>
+            <Link to={'/'}><ArrowLeftOutlined /> Quay lại trang chủ</Link>
             <Link to={'/forgot-password'}>Quên mật khẩu?</Link>
           </div>
 
-          <Form.Item>
-            <Link to={'/'}><ArrowLeftOutlined /> quay lại trang chủ</Link>
-            <Divider />
-            <div style={{ textAlign: 'center' }}>
-              Chưa có tài khoản? <Link to={'/register'}>Đăng ký tài khoản</Link>
-            </div>
-          </Form.Item>
+          <Divider />
+          <div style={{ textAlign: 'center' }}>
+            Chưa có tài khoản? <Link to={'/register'}>Đăng ký tài khoản</Link>
+          </div>
         </fieldset>
       </Col>
     </Row>

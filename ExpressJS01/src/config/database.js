@@ -18,6 +18,16 @@ const sequelize = new Sequelize(
 const connection = async () => {
 	await sequelize.authenticate();
 	console.log('Connected to database');
+	
+	// Import models after sequelize is ready
+	const User = require('../models/user');
+	const Category = require('../models/category');
+	const Product = require('../models/product');
+	
+	// Define associations
+	Category.hasMany(Product, { foreignKey: 'category_id', as: 'products' });
+	Product.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
+	
 	// Auto sync models to DB. For production, consider migrations instead.
 	await sequelize.sync({ alter: true });
 };

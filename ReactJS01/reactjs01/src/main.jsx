@@ -14,7 +14,10 @@ import HomePage from './pages/home.jsx';
 import LoginPage from './pages/login.jsx';
 import ForgotPasswordPage from './pages/forgot-password.jsx';
 import ResetPasswordPage from './pages/reset-password.jsx';
+import ProductsPage from './pages/products.jsx';
+import ProductDetailPage from './pages/product-detail.jsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
+import { ProductsProvider } from './components/context/products.context.jsx';
 
 const router = createBrowserRouter([
   {
@@ -45,6 +48,14 @@ const router = createBrowserRouter([
       {
         path: "reset-password",
         element: <ResetPasswordPage />
+      },
+      {
+        path: "products/:categoryId",
+        element: <ProductsPage />
+      },
+      {
+        path: "product/:id",
+        element: <ProductDetailPage />
       }
     ],
   },
@@ -53,7 +64,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthWrapper>
-      <RouterProvider router={router} />
+      <ProductsProvider>
+        <RouterProvider router={router} />
+      </ProductsProvider>
     </AuthWrapper>
   </React.StrictMode>,
 );
