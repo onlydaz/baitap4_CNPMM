@@ -28,8 +28,8 @@ const ProductList = ({ products, loading }) => {
                     xs={24} 
                     sm={12} 
                     md={8} 
-                    lg={6} 
-                    xl={6}
+                    lg={8} 
+                    xl={8}
                 >
                     <ProductCard product={product} />
                 </Col>

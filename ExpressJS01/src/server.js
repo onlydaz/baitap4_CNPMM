@@ -7,6 +7,8 @@ const apiRoutes = require('./routes/api');
 const connection = require('./config/database');
 const { getHomepage } = require('./controllers/homecontroller');
 const cors = require('cors');
+const { bulkIndexProducts } = require('./services/searchService');
+const Product = require('./models/product');
 
 //cấu hình app là express
 const app = express();
@@ -31,6 +33,15 @@ app.use('/v1/api', apiRoutes);
     try {
         //kết nối database using Sequelize (MySQL)
         await connection();
+
+        // Bulk index products to Elasticsearch (best-effort, non-blocking)
+        try {
+            const rows = await Product.findAll();
+            await bulkIndexProducts(rows.map(r => r.toJSON()));
+            console.log(`Indexed ${rows.length} products to Elasticsearch`);
+        } catch (e) {
+            console.log('Elasticsearch bulk index skipped/failed:', e?.message || e);
+        }
 
         //lắng nghe port trong env
         app.listen(port, () => {

@@ -42,6 +42,16 @@ const Product = sequelize.define('Product', {
         type: DataTypes.ENUM('active', 'inactive'),
         allowNull: false,
         defaultValue: 'active'
+    },
+    discount_percent: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    views: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+        defaultValue: 0
     }
 }, {
     tableName: 'products',

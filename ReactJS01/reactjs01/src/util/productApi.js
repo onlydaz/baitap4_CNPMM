@@ -28,9 +28,31 @@ export const getProductByIdApi = (id) => {
     return axios.get(URL_API);
 };
 
-export const searchProductsApi = (query, page = 1, limit = 10) => {
+export const searchProductsApi = (query, options = {}) => {
     const URL_API = "/v1/api/products/search";
-    const params = { q: query, page, limit };
+    const {
+        page = 1,
+        limit = 10,
+        category_id,
+        price_min,
+        price_max,
+        has_promo,
+        discount_min,
+        views_min,
+        sort
+    } = options;
+    const params = {
+        q: query,
+        page,
+        limit,
+        ...(category_id && { category_id }),
+        ...(price_min != null && { price_min }),
+        ...(price_max != null && { price_max }),
+        ...(has_promo != null && { has_promo }),
+        ...(discount_min != null && { discount_min }),
+        ...(views_min != null && { views_min }),
+        ...(sort && { sort })
+    };
     return axios.get(URL_API, { params });
 };
 

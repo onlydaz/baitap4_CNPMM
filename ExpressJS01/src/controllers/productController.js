@@ -1,4 +1,5 @@
 const { getProductsService, getProductByIdService, searchProductsService, createProductService } = require('../services/productService');
+const { searchProducts: esSearchProducts, indexProduct: esIndexProduct } = require('../services/searchService');
 
 const getProducts = async (req, res) => {
     try {
@@ -55,30 +56,34 @@ const getProductById = async (req, res) => {
 
 const searchProducts = async (req, res) => {
     try {
-        const { q, page = 1, limit = 10 } = req.query;
-        
-        if (!q) {
-            return res.status(400).json({
-                EC: 1,
-                EM: 'Search query is required'
-            });
-        }
-        
-        const data = await searchProductsService(q, page, limit);
-        
-        if (data) {
-            return res.status(200).json({
-                EC: 0,
-                EM: 'Search products successfully',
-                data: data.products,
-                pagination: data.pagination
-            });
-        } else {
-            return res.status(500).json({
-                EC: 1,
-                EM: 'Error searching products'
-            });
-        }
+        const params = {
+            q: req.query.q || '',
+            category_id: req.query.category_id,
+            price_min: req.query.price_min,
+            price_max: req.query.price_max,
+            has_promo: req.query.has_promo,
+            discount_min: req.query.discount_min,
+            views_min: req.query.views_min,
+            sort: req.query.sort,
+            page: req.query.page || 1,
+            limit: req.query.limit || 10
+        };
+
+        const result = await esSearchProducts(params);
+
+        return res.status(200).json({
+            EC: 0,
+            EM: 'Search products successfully',
+            data: result.items,
+            pagination: {
+                currentPage: result.page,
+                totalPages: Math.ceil(result.total / result.limit),
+                totalItems: result.total,
+                itemsPerPage: result.limit,
+                hasNextPage: result.page < Math.ceil(result.total / result.limit),
+                hasPrevPage: result.page > 1
+            }
+        });
     } catch (error) {
         console.log('Error in searchProducts controller:', error);
         return res.status(500).json({
@@ -94,6 +99,8 @@ const createProduct = async (req, res) => {
         const data = await createProductService(name, description, price, image, category_id, stock);
         
         if (data) {
+            // index to Elasticsearch (best-effort)
+            esIndexProduct(data).catch(() => {});
             return res.status(201).json({
                 EC: 0,
                 EM: 'Create product successfully',
