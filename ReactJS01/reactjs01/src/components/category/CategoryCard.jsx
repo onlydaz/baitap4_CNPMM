@@ -19,7 +19,7 @@ const CategoryCard = ({ category }) => {
             cover={
                 <Image
                     alt={category.name}
-                    src={category.image || 'https://via.placeholder.com/300x200?text=No+Image'}
+                    src={category.image ? `http://localhost:8888/${category.image}` : 'https://via.placeholder.com/300x200?text=No+Image'}
                     style={{ height: 150, objectFit: 'cover' }}
                     fallback="https://via.placeholder.com/300x200?text=Error+Loading+Image"
                 />

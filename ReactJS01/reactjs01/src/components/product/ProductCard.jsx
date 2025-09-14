@@ -24,7 +24,7 @@ const ProductCard = ({ product }) => {
             cover={
                 <Image
                     alt={product.name}
-                    src={product.image || 'https://via.placeholder.com/300x200?text=No+Image'}
+                    src={product.image ? `http://localhost:8888/${product.image}` : 'https://via.placeholder.com/300x200?text=No+Image'}
                     style={{ height: 200, objectFit: 'cover' }}
                     fallback="https://via.placeholder.com/300x200?text=Error+Loading+Image"
                 />

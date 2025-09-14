@@ -38,9 +38,9 @@ const HomePage = () => {
         <div style={{ padding: '20px' }}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <div style={{ textAlign: 'center' }}>
-                    <Title level={1}>Cửa hàng trực tuyến</Title>
+                    <Title level={1}>Cửa hàng UTE</Title>
                     <Title level={3} type="secondary">
-                        Khám phá các sản phẩm theo danh mục
+                        Danh mục sản phẩm
                     </Title>
                 </div>
 

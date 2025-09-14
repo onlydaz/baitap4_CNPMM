@@ -123,7 +123,7 @@ const ProductDetailPage = () => {
                     <Col xs={24} md={12}>
                         <Image
                             alt={product.name}
-                            src={product.image || 'https://via.placeholder.com/500x400?text=No+Image'}
+                            src={product.image ? `http://localhost:8888/${product.image}` : 'https://via.placeholder.com/500x400?text=No+Image'}
                             style={{ width: '100%', borderRadius: '8px' }}
                             fallback="https://via.placeholder.com/500x400?text=Error+Loading+Image"
                         />
