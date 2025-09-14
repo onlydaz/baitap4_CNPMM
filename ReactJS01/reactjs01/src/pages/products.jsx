@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Row, Col, Typography, Button, Space, Alert } from 'antd';
+import { Row, Col, Typography, Button, Space, Alert, Pagination } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
 import ProductList from '../components/product/ProductList';
 import ProductSearch from '../components/product/ProductSearch';
 import ProductFilters from '../components/product/ProductFilters';
-import InfiniteScroll from '../components/common/InfiniteScroll';
 import { useCategories } from '../hooks/useProducts';
-import { useLazyProducts } from '../hooks/useLazyProducts';
+import { useProducts } from '../hooks/useLazyProducts';
 
 const { Title } = Typography;
 
@@ -20,6 +19,7 @@ const ProductsPage = () => {
     
     const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
     const search = searchParams.get('search') || '';
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
     const [filters, setFilters] = useState({
         price_min: searchParams.get('price_min') ? Number(searchParams.get('price_min')) : undefined,
         price_max: searchParams.get('price_max') ? Number(searchParams.get('price_max')) : undefined,
@@ -32,13 +32,15 @@ const ProductsPage = () => {
     const { categories } = useCategories();
     const currentCategory = categories.find(cat => cat.id === parseInt(categoryId));
     
-    const { products, loading, hasMore, error, loadMore } = useLazyProducts(categoryId, search, filters);
+    const { products, loading, error, pagination } = useProducts(categoryId, search, filters, currentPage);
 
     const handleSearch = (query) => {
         setSearchQuery(query);
+        setCurrentPage(1); // Reset to page 1 when searching
         setSearchParams({ 
             ...Object.fromEntries(searchParams),
-            search: query
+            search: query,
+            page: 1
         });
     };
 
@@ -48,17 +50,21 @@ const ProductsPage = () => {
 
     const handleClearSearch = () => {
         setSearchQuery('');
+        setCurrentPage(1);
         setSearchParams({ 
             ...Object.fromEntries(searchParams),
-            search: ''
+            search: '',
+            page: 1
         });
     };
 
     const handleFiltersChange = (next) => {
         setFilters(next);
+        setCurrentPage(1); // Reset to page 1 when filtering
         const params = {
             ...Object.fromEntries(searchParams),
-            search: searchParams.get('search') || ''
+            search: searchParams.get('search') || '',
+            page: 1
         };
         if (next.price_min != null) params.price_min = next.price_min; else delete params.price_min;
         if (next.price_max != null) params.price_max = next.price_max; else delete params.price_max;
@@ -72,9 +78,11 @@ const ProductsPage = () => {
     const handleClearFilters = () => {
         const cleared = { price_min: undefined, price_max: undefined, has_promo: false, discount_min: undefined, views_min: undefined, sort: 'relevance' };
         setFilters(cleared);
+        setCurrentPage(1);
         const params = {
             ...Object.fromEntries(searchParams),
-            search: searchParams.get('search') || ''
+            search: searchParams.get('search') || '',
+            page: 1
         };
         delete params.price_min;
         delete params.price_max;
@@ -83,6 +91,16 @@ const ProductsPage = () => {
         delete params.views_min;
         delete params.sort;
         setSearchParams(params);
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        setSearchParams({ 
+            ...Object.fromEntries(searchParams),
+            page: page
+        });
+        // Scroll to top when changing page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return (
@@ -137,13 +155,24 @@ const ProductsPage = () => {
                                 style={{ marginBottom: 12 }}
                             />
                         )}
-                        <InfiniteScroll
-                            onLoadMore={loadMore}
-                            hasMore={hasMore}
-                            loading={loading}
-                        >
-                            <ProductList products={products} loading={false} />
-                        </InfiniteScroll>
+                        <ProductList products={products} loading={loading} />
+                        
+                        {/* Pagination */}
+                        {pagination.totalPages > 1 && (
+                            <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                                <Pagination
+                                    current={pagination.currentPage}
+                                    total={pagination.totalItems}
+                                    pageSize={pagination.itemsPerPage}
+                                    onChange={handlePageChange}
+                                    showSizeChanger={false}
+                                    showQuickJumper
+                                    showTotal={(total, range) => 
+                                        `${range[0]}-${range[1]} của ${total} sản phẩm`
+                                    }
+                                />
+                            </div>
+                        )}
                     </Col>
                 </Row>
             </Space>

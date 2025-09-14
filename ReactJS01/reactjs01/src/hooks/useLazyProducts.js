@@ -1,23 +1,22 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getProductsApi, searchProductsApi } from '../util/productApi';
 
-export const useLazyProducts = (categoryId = null, search = '', filters = {}) => {
+export const useProducts = (categoryId = null, search = '', filters = {}, currentPage = 1) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
     const [error, setError] = useState(null);
-    const currentPageRef = useRef(1);
-    const isLoadingRef = useRef(false);
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: 9
+    });
 
-    const loadProducts = useCallback(async (reset = false) => {
-        if (isLoadingRef.current) return;
-        
-        isLoadingRef.current = true;
+    const loadProducts = useCallback(async () => {
         setLoading(true);
         setError(null);
         
         try {
-            const page = reset ? 1 : currentPageRef.current;
             let response;
             const hasSearch = !!(search && search.trim());
             const hasFilters = (() => {
@@ -28,6 +27,7 @@ export const useLazyProducts = (categoryId = null, search = '', filters = {}) =>
                     return v !== undefined && v !== null && v !== '';
                 });
             })();
+            
             // Determine if only sort is active (no other filters and no search)
             const sortOnly = (() => {
                 const f = filters || {};
@@ -44,11 +44,11 @@ export const useLazyProducts = (categoryId = null, search = '', filters = {}) =>
             if (hasSearch || hasFilters) {
                 if (sortOnly) {
                     // Fallback: load normal list then sort client-side
-                    response = await getProductsApi(categoryId, page, 12, '');
+                    response = await getProductsApi(categoryId, currentPage, 9, '');
                 } else {
                     response = await searchProductsApi(search || '', {
-                        page,
-                        limit: 12,
+                        page: currentPage,
+                        limit: 9,
                         category_id: categoryId || undefined,
                         price_min: filters.price_min,
                         price_max: filters.price_max,
@@ -59,11 +59,12 @@ export const useLazyProducts = (categoryId = null, search = '', filters = {}) =>
                     });
                 }
             } else {
-                response = await getProductsApi(categoryId, page, 12, '');
+                response = await getProductsApi(categoryId, currentPage, 9, '');
             }
             
             if (response.EC === 0) {
                 let newProducts = response.data || [];
+                
                 // If only sort is active, apply client-side sort
                 const applyClientSort = (items) => {
                     const s = filters?.sort;
@@ -77,10 +78,10 @@ export const useLazyProducts = (categoryId = null, search = '', filters = {}) =>
                 };
 
                 // If using filters without keyword and ES returns empty (ES disabled or no hits),
-                // fallback: fetch normal list (already done above if sortOnly; otherwise do here) and filter client-side
+                // fallback: fetch normal list and filter client-side
                 const usingFiltersWithoutKeyword = hasFilters && !hasSearch && !sortOnly;
                 if (usingFiltersWithoutKeyword && newProducts.length === 0) {
-                    const normal = await getProductsApi(categoryId, page, 12, '');
+                    const normal = await getProductsApi(categoryId, currentPage, 9, '');
                     if (normal.EC === 0) {
                         const raw = normal.data || [];
                         newProducts = raw.filter(p => {
@@ -98,56 +99,51 @@ export const useLazyProducts = (categoryId = null, search = '', filters = {}) =>
                         response = normal; // reuse pagination
                     }
                 }
+                
                 if (sortOnly) {
                     newProducts = applyClientSort(newProducts);
                 }
-                const pagination = response.pagination || {};
                 
-                if (reset) {
-                    setProducts(newProducts);
-                    currentPageRef.current = 2;
-                } else {
-                    setProducts(prev => {
-                        const merged = [...prev, ...newProducts];
-                        return sortOnly ? applyClientSort(merged) : merged;
-                    });
-                    currentPageRef.current = currentPageRef.current + 1;
-                }
-                
-                setHasMore(pagination.hasNextPage || false);
+                setProducts(newProducts);
+                setPagination(response.pagination || {
+                    currentPage: currentPage,
+                    totalPages: 1,
+                    totalItems: newProducts.length,
+                    itemsPerPage: 9
+                });
             } else {
                 setError(response.EM || 'Có lỗi xảy ra');
-                setHasMore(false);
+                setProducts([]);
+                setPagination({
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalItems: 0,
+                    itemsPerPage: 9
+                });
             }
         } catch (err) {
             setError('Không thể tải sản phẩm');
-            setHasMore(false);
+            setProducts([]);
+            setPagination({
+                currentPage: 1,
+                totalPages: 1,
+                totalItems: 0,
+                itemsPerPage: 9
+            });
         } finally {
             setLoading(false);
-            isLoadingRef.current = false;
         }
-    }, [categoryId, search, filters]);
+    }, [categoryId, search, filters, currentPage]);
 
-    const loadMore = useCallback(() => {
-        if (hasMore && !loading && !isLoadingRef.current) {
-            loadProducts(false);
-        }
-    }, [hasMore, loading, loadProducts]);
-
-    // Reset products khi categoryId hoặc search thay đổi
+    // Load products when dependencies change
     useEffect(() => {
-        setProducts([]);
-        currentPageRef.current = 1;
-        setHasMore(true);
-        setError(null);
-        loadProducts(true);
-    }, [categoryId, search, filters, loadProducts]);
+        loadProducts();
+    }, [loadProducts]);
 
     return {
         products,
         loading,
-        hasMore,
         error,
-        loadMore
+        pagination
     };
 };

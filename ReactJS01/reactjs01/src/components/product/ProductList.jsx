@@ -30,6 +30,7 @@ const ProductList = ({ products, loading }) => {
                     md={8} 
                     lg={8} 
                     xl={8}
+                    style={{ marginBottom: '16px' }}
                 >
                     <ProductCard product={product} />
                 </Col>

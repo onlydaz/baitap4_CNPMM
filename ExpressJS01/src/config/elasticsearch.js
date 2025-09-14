@@ -14,9 +14,9 @@ if (!node) {
       username: process.env.ES_USERNAME,
       password: process.env.ES_PASSWORD
     } : undefined,
-    tls: process.env.ES_TLS_REJECT_UNAUTHORIZED === 'false' ? {
+    tls: {
       rejectUnauthorized: false
-    } : undefined
+    }
   });
   module.exports = client;
 }
